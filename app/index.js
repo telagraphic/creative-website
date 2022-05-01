@@ -2,13 +2,23 @@ import About from 'pages/About'
 import Home from 'pages/Home'
 import Detail from 'pages/Detail'
 import Collections from 'pages/Collections'
+import Preloader from 'components/Preloader'
 import each from 'lodash/each'
 
 class App {
   constructor () {
     this.createContent()
     this.createPages()
+    this.createPreloader()
     this.addLinkListeners()
+    this.addEventListeners()
+
+    this.update()
+  }
+
+  createPreloader () {
+    this.preloader = new Preloader()
+    this.preloader.once('completed', this.onPreloaded.bind(this))
   }
 
   createContent() {
@@ -26,8 +36,15 @@ class App {
 
     this.page = this.pages[this.template]
     this.page.create()
+  }
+
+  onPreloaded() {
+    this.preloader.destroy()
+    this.onResize()
     this.page.show()
   }
+
+  // events
 
   async onChange(url) {
     await this.page.hide()
@@ -45,11 +62,37 @@ class App {
       this.page = this.pages[this.template]
 
       this.page.create()
+
+      this.onResize()
+
       this.page.show()
+      this.addLinkListeners()
     } else {
       console.log("Error")
     }
 
+  }
+
+  onResize() {
+    if (this.page && this.page.onResize) {
+      this.page.onResize()
+    }
+  }
+
+
+  // loop
+
+  update () {
+    if (this.page && this.page.update) {
+      this.page.update()
+    }
+    window.requestAnimationFrame(this.update.bind(this))
+  }
+
+  // listeners
+
+  addEventListeners() {
+    window.addEventListener('resize', this.onResize.bind(this))
   }
 
   addLinkListeners () {
@@ -66,5 +109,7 @@ class App {
     })
   }
 }
+
+
 
 new App()
