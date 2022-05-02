@@ -4,6 +4,7 @@ import Home from 'pages/Home'
 import Detail from 'pages/Detail'
 import Collections from 'pages/Collections'
 import Preloader from 'components/Preloader'
+import Detection from 'classes/Detection'
 import each from 'lodash/each'
 
 class App {
@@ -13,7 +14,7 @@ class App {
     this.createPreloader()
     this.createNavigation()
     this.createPages()
-    
+
     this.addLinkListeners()
     this.addEventListeners()
 
@@ -54,9 +55,16 @@ class App {
     this.page.show()
   }
 
+  onPopState () {
+    this.onChange({
+      url: window.location.pathname,
+      push: false
+    })
+  }
+
   // events
 
-  async onChange(url) {
+  async onChange({url, push = true}) {
     await this.page.hide()
 
     const request = await window.fetch(url)
@@ -64,6 +72,11 @@ class App {
     if (request.status === 200) {
       const html = await request.text()
       const div = document.createElement('div')
+
+      if (push) {
+        window.history.pushState({}, "", url)
+      }
+
       div.innerHTML = html
       const divContent = div.querySelector('.content')
       this.template = divContent.getAttribute('data-template')
@@ -105,6 +118,7 @@ class App {
   // listeners
 
   addEventListeners() {
+    window.addEventListener('popstate', this.onPopState.bind(this))
     window.addEventListener('resize', this.onResize.bind(this))
   }
 
@@ -117,7 +131,7 @@ class App {
 
         event.preventDefault()
 
-        this.onChange(href)
+        this.onChange({url: href, })
       }
     })
   }
