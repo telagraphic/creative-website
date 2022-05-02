@@ -83,7 +83,7 @@ app.get('/about', async (req, res) => {
   const about = await api.getSingle('about')
   const defaults = await handleRequest(api)
 
-  console.log(about.data.body[1].primary.description)
+  // console.log(about.data.body[1].primary.description)
 
   res.render('pages/about', {
     ...defaults,
